@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KISANCONNECT - Smart Token Marketplace</title>
+    <style>
+        :root {
+            --grass-green: #2E5A27;
+            --wheat-gold: #D4A373;
+            --bajra-cream: #F4F1DE;
+            --light-green: #606C38;
+            --card-bg: #FFFFFF;
+            --text-dark: #283618;
+            --expired-gray: #7d8597;
+            --alert-red: #d90429;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--grass-green), var(--light-green));
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--bajra-cream);
+            padding: 22px 18px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            border: 4px solid var(--wheat-gold);
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            color: var(--grass-green);
+            margin-bottom: 5px;
+        }
+
+        p.subtitle {
+            color: #555;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+
+        /* Page Display State */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Page 1 Grid Styles */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            justify-items: center;
+            margin-bottom: 15px;
+        }
+
+        .lang-card {
+            width: 100%;
+            height: 75px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--wheat-gold);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
+        }
+
+        .lang-card:hover, .lang-card.selected {
+            background-color: var(--wheat-gold);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .add-card {
+            background-color: #E9EDC9;
+            border: 2px dashed var(--grass-green);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 12px;
+            height: 75px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .circle-plus {
+            width: 35px;
+            height: 35px;
+            background-color: var(--grass-green);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* AI Voice Assistant Bar */
+        .ai-assistant-bar {
+            background-color: #E9EDC9;
+            border: 2px solid var(--grass-green);
+            border-radius: 12px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .ai-assistant-bar:hover {
+            background-color: #d8debc;
+        }
+
+        .mic-icon {
+            width: 35px;
+            height: 35px;
+            background-color: var(--grass-green);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 90, 39, 0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(46, 90, 39, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 90, 39, 0); }
+        }
+
+        .ai-text {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            line-height: 1.3;
+        }
+
+        /* Form Controls */
+        .input-group {
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 3px;
+            color: var(--grass-green);
+        }
+
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%;
+            padding: 9px 11px;
+            border: 2px solid var(--wheat-gold);
+            border-radius: 10px;
+            background-color: var(--card-bg);
+            font-size: 0.9rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+            color: var(--text-dark);
+        }
+
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+            border-color: var(--grass-green);
+        }
+
+        .input-group textarea {
+            resize: none;
+            height: 50px;
+        }
+
+        /* Page 3 Vertical Category Cards */
+        .category-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .category-card {
+            width: 100%;
+            height: 65px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--wheat-gold);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            padding: 0 18px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            gap: 15px;
+        }
+
+        .category-card:hover, .category-card.selected {
+            background-color: var(--wheat-gold);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .category-icon {
+            font-size: 1.3rem;
+        }
+
+        /* Page 5 Token Dashboard Box */
+        .token-card {
+            background-color: var(--card-bg);
+            border: 2px solid var(--grass-green);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: left;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        /* Shaded / Disabled state when Token expires */
+        .token-card.expired {
+            background-color: #e9ecef;
+            border-color: var(--expired-gray);
+            opacity: 0.65;
+            filter: grayscale(80%);
+            pointer-events: none;
+        }
+
+        .token-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px dashed var(--wheat-gold);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        .token-number {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--grass-green);
+        }
+
+        .timer-badge {
+            background-color: var(--wheat-gold);
+            color: white;
+            font-size: 0.78rem;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .token-details p {
+            margin: 6px 0;
+            font-size: 0.86rem;
+            color: var(--text-dark);
+            line-height: 1.4;
+        }
+
+        .payment-badge {
+            background-color: #E9EDC9;
+            color: var(--grass-green);
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 0.83rem;
+            font-weight: bold;
+            border: 1px solid var(--grass-green);
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* Red Reschedule Button */
+        .reschedule-btn {
+            display: none;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--alert-red);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(217, 4, 41, 0.3);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .reschedule-btn:hover {
+            background-color: #b8001f;
+            transform: translateY(-2px);
+        }
+
+        /* Standard Continue Button */
+        .btn-continue {
+            width: 100%;
+            padding: 11px;
+            background-color: var(--grass-green);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            margin-top: 5px;
+        }
+
+        .btn-continue:hover {
+            background-color: #1e3c19;
+            transform: translateY(-2px);
+        }
+
+        .test-expire-link {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: #666;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- PAGE 1: LANGUAGE SELECTION -->
+        <div id="page1" class="page active">
+            <h1>Choose Your Language</h1>
+            <p class="subtitle">अपनी भाषा चुनें / Select your preferred language</p>
+
+            <div class="grid-container">
+                <div class="lang-card" onclick="setLanguage('en')">English</div>
+                <div class="lang-card" onclick="setLanguage('hi')">हिन्दी</div>
+                <div class="lang-card" onclick="setLanguage('mr')">मराठी</div>
+                <div class="lang-card" onclick="setLanguage('ta')">தமிழ்</div>
+                <div class="lang-card" onclick="setLanguage('gu')">ગુજરાતી</div>
+                <div class="lang-card" onclick="setLanguage('pa')">ਪੰਜਾਬੀ</div>
+                
+                <div class="add-card" onclick="addNewLanguage()" style="grid-column: span 2;">
+                    <div class="circle-plus">+</div>
+                </div>
+            </div>
+
+            <button class="btn-continue" onclick="goToPage2()">Continue</button>
+        </div>
+
+        <!-- PAGE 2: USER DETAILS & AI ASSISTANT -->
+        <div id="page2" class="page">
+            <div class="ai-assistant-bar" onclick="triggerVoiceAssistant()">
+                <div class="mic-icon">🎙️</div>
+                <div class="ai-text" id="aiPromptTextPage2">Ask how can I help you</div>
+            </div>
+
+            <div class="input-group">
+                <label id="lblMobile">Mobile Number</label>
+                <input type="tel" id="mobileNum" placeholder="Enter 10-digit mobile number" maxlength="10">
+            </div>
+
+            <div class="input-group">
+                <label id="lblOtp">OTP Verification</label>
+                <input type="text" id="otpCode" placeholder="Enter 6-digit OTP" maxlength="6">
+            </div>
+
+            <div class="input-group">
+                <label id="lblAddress">Workplace Address</label>
+                <textarea id="workAddress" placeholder="Enter your farm/workplace address"></textarea>
+            </div>
+
+            <button class="btn-continue" id="btnPage2Continue" onclick="goToPage3()">Continue</button>
+        </div>
+
+        <!-- PAGE 3: CATEGORY CHOICE -->
+        <div id="page3" class="page">
+            <div class="ai-assistant-bar" onclick="triggerVoiceAssistant()">
+                <div class="mic-icon">🎙️</div>
+                <div class="ai-text" id="aiPromptTextPage3">Ask how can I help you</div>
+            </div>
+
+            <h1 id="p3Heading" style="margin-bottom: 12px;">What do you want to sell?</h1>
+
+            <div class="category-container">
+                <div class="category-card" id="catVeg" onclick="selectCategory('vegetables')">
+                    <span class="category-icon">🥦</span>
+                    <span id="lblVegetables">Vegetables</span>
+                </div>
+                <div class="category-card" id="catFruit" onclick="selectCategory('fruits')">
+                    <span class="category-icon">🍎</span>
+                    <span id="lblFruits">Fruits</span>
+                </div>
+                <div class="category-card" id="catCrop" onclick="selectCategory('crops')">
+                    <span class="category-icon">🌾</span>
+                    <span id="lblCrops">Crops</span>
+                </div>
+            </div>
+
+            <button class="btn-continue" id="btnPage3Continue" onclick="goToPage4()">Continue</button>
+        </div>
+
+        <!-- PAGE 4: GROWN QUANTITY, RATE & HARVEST DATE -->
+        <div id="page4" class="page">
+            <div class="ai-assistant-bar" onclick="triggerVoiceAssistant()">
+                <div class="mic-icon">🎙️</div>
+                <div class="ai-text" id="aiPromptTextPage4">Ask how can I help you</div>
+            </div>
+
+            <div class="input-group">
+                <label id="lblSelectProduce">Select Produce to Sell</label>
+                <select id="produceDropdown">
+                    <option value="" disabled selected>-- Choose --</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label id="lblSelectSize">Size</label>
+                <select id="sizeDropdown">
+                    <option value="" disabled selected>-- Select Size --</option>
+                    <option value="large-medium" id="optLargeMed">Large-Medium</option>
+                    <option value="medium-small" id="optMedSmall">Medium-Small</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label id="lblGrownQuantity">Total Quantity Grown (KG)</label>
+                <input type="number" id="produceGrownQty" placeholder="Enter total grown quantity in KG">
+            </div>
+
+            <div class="input-group">
+                <label id="lblRatePerKg">Rate per KG (₹)</label>
+                <input type="number" id="ratePerKg" placeholder="Enter expected rate per KG">
+            </div>
+
+            <div class="input-group">
+                <label id="lblHarvestDate">Ripening / Harvest Date</label>
+                <input type="date" id="harvestDate">
+            </div>
+
+            <button class="btn-continue" id="btnPage4Continue" onclick="goToPage5()">Continue</button>
+        </div>
+
+        <!-- PAGE 5: LOCALIZED TOKEN & 3-HR TIME WINDOW DASHBOARD -->
+        <div id="page5" class="page">
+            <div class="ai-assistant-bar" onclick="triggerVoiceAssistant()">
+                <div class="mic-icon">🎙️</div>
+                <div class="ai-text" id="aiPromptTextPage5">Ask how can I help you</div>
+            </div>
+
+            <h1 id="p5Heading" style="margin-bottom: 10px;">Collection Appointment</h1>
+
+            <div class="token-card" id="mainTokenCard">
+                <div class="token-header">
+                    <div>
+                        <span id="lblTokenLabel">Token No:</span>
+                        <span class="token-number" id="tokenNumberDisplay">AGRI-4089</span>
+                    </div>
+                    <div class="timer-badge" id="timerBadge">⌛ 03:00:00</div>
+                </div>
+                <div class="token-details" id="tokenDetailsText">
+                    <!-- Populated dynamically -->
+                </div>
+                <div class="payment-badge" id="paymentBadgeText">
+                    💰 Payment will be disbursed immediately upon product submission at the center.
+                </div>
+            </div>
+
+            <button class="reschedule-btn" id="btnReschedule" onclick="rescheduleToken()">
+                ⚠️ Token Expired! Reschedule Token
+            </button>
+
+            <button class="btn-continue" id="btnPage5Done" onclick="submitAppointment()">Done</button>
+            <span class="test-expire-link" onclick="expireTokenImmediately()">[Dev Test: Simulate Token Expiration]</span>
+        </div>
+
+    </div>
+
+    <script>
+        // Full Localized Multi-Language Dictionary including Page 5 properties
+        const translations = {
+            en: {
+                aiHelp: "Ask how can I help you",
+                mobile: "Mobile Number",
+                mobilePlaceholder: "Enter 10-digit mobile number",
+                otp: "OTP Verification",
+                otpPlaceholder: "Enter 6-digit OTP",
+                address: "Workplace Address",
+                addressPlaceholder: "Enter your farm/workplace address",
+                vegetables: "Vegetables",
+                fruits: "Fruits",
+                crops: "Crops",
+                sellHeading: "What do you want to sell?",
+                selectProduce: "Select Produce to Sell",
+                selectSize: "Size",
+                largeMed: "Large-Medium",
+                medSmall: "Medium-Small",
+                grownQuantity: "Total Quantity Grown (KG)",
+                grownQtyPlaceholder: "Enter total grown quantity in KG",
+                ratePerKg: "Rate per KG (₹)",
+                ratePlaceholder: "Enter expected rate per KG",
+                harvestDate: "Ripening / Harvest Date",
+                continueBtn: "Continue",
+                p5Heading: "Collection Appointment",
+                tokenLabel: "Token No:",
+                paymentNote: "💰 Payment will be disbursed immediately upon product submission at the center.",
+                rescheduleMsg: "⚠️ Token Expired! Reschedule Token",
+                itemLabel: "Item:",
+                grownLabel: "Farmer Total Grown:",
+                reqQtyLabel: "Agency Required Quantity:",
+                scheduleLabel: "Schedule Date & Slot:",
+                centerLabel: "Collection Center:",
+                centerName: "State Agro Hub, Gate No. 3, Main Mandi Yard.",
+                doneBtn: "Done",
+                successAlert: "Submission verified successfully!"
+            },
+            hi: {
+                aiHelp: "पूछिए, मैं आपकी कैसे मदद कर सकता हूँ",
+                mobile: "मोबाइल नंबर",
+                mobilePlaceholder: "10 अंकों का मोबाइल नंबर दर्ज करें",
+                otp: "ओटीपी सत्यापन",
+                otpPlaceholder: "6 अंकों का ओटीपी दर्ज करें",
+                address: "कार्यस्थल का पता",
+                addressPlaceholder: "अपने खेत या कार्यस्थल का पता दर्ज करें",
+                vegetables: "सब्जियाँ",
+                fruits: "फल",
+                crops: "फसलें",
+                sellHeading: "आप क्या बेचना चाहते हैं?",
+                selectProduce: "बेचने के लिए उपज चुनें",
+                selectSize: "आकार (Size)",
+                largeMed: "बड़ा-मध्यम (Large-Medium)",
+                medSmall: "मध्यम-छोटा (Medium-Small)",
+                grownQuantity: "कुल उगाई गई मात्रा (किग्रा)",
+                grownQtyPlaceholder: "कुल उगाई मात्रा किलो में दर्ज करें",
+                ratePerKg: "प्रति किलो दर (₹)",
+                ratePlaceholder: "प्रति किलो अपेक्षित दर दर्ज करें",
+                harvestDate: "पकने/कटाई की तारीख",
+                continueBtn: "आगे बढ़ें",
+                p5Heading: "संग्रह नियुक्ति (Appointment)",
+                tokenLabel: "टोकन नं:",
+                paymentNote: "💰 केंद्र पर उत्पाद जमा करने पर तुरंत भुगतान किया जाएगा।",
+                rescheduleMsg: "⚠️ टोकन समाप्त हो गया! टोकन फिर से रीशेड्यूल करें",
+                itemLabel: "फसल/वस्तु:",
+                grownLabel: "किसान द्वारा कुल उगाई गई मात्रा:",
+                reqQtyLabel: "एजेंसी द्वारा आवश्यक मात्रा:",
+                scheduleLabel: "दिनांक एवं समय स्लॉट:",
+                centerLabel: "संग्रह केंद्र:",
+                centerName: "राजकीय कृषि संग्रह केंद्र, गेट नंबर 3, मुख्य मंडी यार्ड।",
+                doneBtn: "पूर्ण / सबमिट",
+                successAlert: "सबमिशन सफलतापूर्वक सत्यापित हो गया!"
+            },
+            mr: {
+                aiHelp: "विचार, मी तुम्हाला कशी मदत करू शकेन",
+                mobile: "मोबाईल नंबर",
+                mobilePlaceholder: "१० अंकी मोबाईल नंबर प्रविष्ट करा",
+                otp: "OTP पडताळणी",
+                otpPlaceholder: "६ अंकी OTP प्रविष्ट करा",
+                address: "कामाच्या ठिकाणाचा पत्ता",
+                addressPlaceholder: "तुमच्या शेताचा किंवा कामाच्या ठिकाणाचा पत्ता प्रविष्ट करा",
+                vegetables: "भाज्या",
+                fruits: "फळे",
+                crops: "पिके",
+                sellHeading: "तुम्हाला काय विकायचे आहे?",
+                selectProduce: "विकण्यासाठी पीक/उत्पादन निवडा",
+                selectSize: "आकार (Size)",
+                largeMed: "मोठे-मध्यम (Large-Medium)",
+                medSmall: "मध्यम-लहान (Medium-Small)",
+                grownQuantity: "एकूण पिकवलेले प्रमाण (किलो)",
+                grownQtyPlaceholder: "एकूण पिकवलेले प्रमाण प्रविष्ट करा",
+                ratePerKg: "प्रति किलो दर (₹)",
+                ratePlaceholder: "प्रति किलो अपेक्षित दर प्रविष्ट करा",
+                harvestDate: "पिकण्याची/कापणीची तारीख",
+                continueBtn: "पुढे चालू ठेवा",
+                p5Heading: "संकलन अपॉइंटमेंट",
+                tokenLabel: "टोकन क्र:",
+                paymentNote: "💰 केंद्रावर उत्पादन जमा केल्यावर त्वरित पेमेंट दिले जाईल.",
+                rescheduleMsg: "⚠️ टोकन मुदत संपली! टोकन रीशेड्यूल करा",
+                itemLabel: "वस्तू:",
+                grownLabel: "शेतकऱ्याचे एकूण पिकवलेले प्रमाण:",
+                reqQtyLabel: "एजन्सीला आवश्यक प्रमाण:",
+                scheduleLabel: "तारीख आणि वेळ स्लॉट:",
+                centerLabel: "संकलन केंद्र:",
+                centerName: "राज्य कृषी संकलन केंद्र, गेट क्र. ३, मुख्य बाजार आवार.",
+                doneBtn: "पूर्ण",
+                successAlert: "सादर यशस्वीरीत्या सत्यापित झाले!"
+            },
+            ta: {
+                aiHelp: "கேளுங்கள், நான் உங்களுக்கு எப்படி உதவ முடியும்",
+                mobile: "மொபைல் எண்",
+                mobilePlaceholder: "10 இலக்க மொபைல் எண்ணை உள்ளிடவும்",
+                otp: "OTP சரிபார்ப்பு",
+                otpPlaceholder: "6 இலக்க OTP ஐ உள்ளிடவும்",
+                address: "பணியிட முகவரி",
+                addressPlaceholder: "உங்கள் பண்ணை/பணியிட முகவரியை உள்ளிடவும்",
+                vegetables: "காய்கறிகள்",
+                fruits: "பழங்கள்",
+                crops: "பயிர்கள்",
+                sellHeading: "நீங்கள் என்ன விற்க விரும்புகிறீர்கள்?",
+                selectProduce: "விற்க उपज தேர்ந்தெடுக்கவும்",
+                selectSize: "அளவு (Size)",
+                largeMed: "பெரியது- நடுத்தரம் (Large-Medium)",
+                medSmall: "நடுத்தரம்- சிறியது (Medium-Small)",
+                grownQuantity: "மொத்த விளைச்சல் அளவு (கிலோ)",
+                grownQtyPlaceholder: "மொத்த விளைச்சலை கிலோவில் உள்ளிடவும்",
+                ratePerKg: "ஒரு கிலோ விலை (₹)",
+                ratePlaceholder: "எதிர்பார்க்கும் விலையை உள்ளிடவும்",
+                harvestDate: "அறுவடை தேதி",
+                continueBtn: "தொடரவும்",
+                p5Heading: "சேகரிப்பு சந்திப்பு",
+                tokenLabel: "டோக்கன் எண்:",
+                paymentNote: "💰 மையத்தில் தயாரிப்பை சமர்ப்பித்தவுடன் உடனடியாக பணம் வழங்கப்படும்.",
+                rescheduleMsg: "⚠️ டோக்கன் காலாவதியானது! டோக்கனை மீண்டும் திட்டமிடுங்கள்",
+                itemLabel: "பொருள்:",
+                grownLabel: "விவசாயி விளைவித்த மொத்த அளவு:",
+                reqQtyLabel: "முகமைக்கு தேவையான அளவு:",
+                scheduleLabel: "தேதி மற்றும் நேர இடைவெளி:",
+                centerLabel: "சேகரிப்பு மையம்:",
+                centerName: "மாநில வேளாண் சேகரிப்பு மையம், நுழைவு வாயில் எண் 3.",
+                doneBtn: "முடிந்தது",
+                successAlert: "சமர்ப்பித்தல் வெற்றிகரமாக சரிபார்க்கப்பட்டது!"
+            },
+            gu: {
+                aiHelp: "પૂછો, હું તમને કેવી રીતે મદદ કરી શકું",
+                mobile: "મોબાઈલ નંબર",
+                mobilePlaceholder: "10 અંકનો મોબાઈલ નંબર દાખલ કરો",
+                otp: "OTP ચકાસણી",
+                otpPlaceholder: "6 અંકનો OTP દાખલ કરો",
+                address: "કાર્યસ્થળનું સરનામું",
+                addressPlaceholder: "તમારા ખેતર/કાર્યસ્થળનું સરનામું દાખલ કરો",
+                vegetables: "શાકભાજી",
+                fruits: "ફળો",
+                crops: "પાક",
+                sellHeading: "તમે શું વેચવા માંગો છો?",
+                selectProduce: "વેચવા માટે પાક પસંદ કરો",
+                selectSize: "કદ (Size)",
+                largeMed: "મોટું-મધ્યમ (Large-Medium)",
+                medSmall: "મધ્યમ-નાનું (Medium-Small)",
+                grownQuantity: "ઉગાડેલ કુલ જથ્થો (કિગ્રા)",
+                grownQtyPlaceholder: "કુલ જથ્થો દાખલ કરો",
+                ratePerKg: "પ્રતિ કિલો દર (₹)",
+                ratePlaceholder: "અપેક્ષિત દર દાખલ કરો",
+                harvestDate: "પાકવાની/કાપણીની તારીખ",
+                continueBtn: "ચાલુ રાખો",
+                p5Heading: "એપોઇન્ટમેન્ટ વિગતો",
+                tokenLabel: "ટોકન નં:",
+                paymentNote: "💰 સેન્ટર પર પ્રોડક્ટ જમા કરાવતાની સાથે જ તરત જ ચુકવણી કરવામાં આવશે.",
+                rescheduleMsg: "⚠️ ટોકન સમાપ્ત થઈ ગયું! ટોકન રીશેડ્યુલ કરો",
+                itemLabel: "વસ્તુ:",
+                grownLabel: "ખેડૂત દ્વારા કુલ ઉત્પાદિત જથ્થો:",
+                reqQtyLabel: "એજન્સીની જરૂરી માત્રા:",
+                scheduleLabel: "તારીખ અને સમય સ્લોટ:",
+                centerLabel: "સંગ્રહ કેન્દ્ર:",
+                centerName: "રાજ્ય કૃષિ સંગ્રહ કેન્દ્ર, ગેટ નં. ૩, મુખ્ય માર્કેટ યાર્ડ.",
+                doneBtn: "પૂર્ણ",
+                successAlert: "સબમિશન સફળતાપૂર્વક ચકાસાયેલ છે!"
+            },
+            pa: {
+                aiHelp: "ਪੁੱਛੋ, ਮੈਂ ਤੁਹਾਡੀ ਕਿਵੇਂ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ",
+                mobile: "ਮੋਬਾਈਲ ਨੰਬਰ",
+                mobilePlaceholder: "10-ਅੰਕਾਂ ਦਾ ਮੋਬਾਈਲ ਨੰਬਰ ਦਾਖल ਕਰੋ",
+                otp: "OTP ਤਸਦੀਕ",
+                otpPlaceholder: "6-ਅੰਕਾਂ ਦਾ OTP ਦਾਖਲ ਕਰੋ",
+                address: "ਕੰਮ ਦੀ ਪਤੇ ਦੀ ਸਥਿਤੀ",
+                addressPlaceholder: "ਆਪਣੇ ਖੇਤ ਜਾਂ ਕੰਮ ਦੀ ਜਗ੍ਹਾ ਦਾ ਪਤਾ ਦਰਜ ਕਰੋ",
+                vegetables: "ਸਬਜ਼ੀਆਂ",
+                fruits: "ਫਲ",
+                crops: "ਫਸਲਾਂ",
+                sellHeading: "ਤੁਸੀਂ ਕੀ ਵੇਚਣਾ ਚਾਹੁੰਦੇ ਹੋ?",
+                selectProduce: "ਵੇਚਣ ਲਈ ਉਪਜ ਚੁਣੋ",
+                selectSize: "ਆਕਾਰ (Size)",
+                largeMed: "ਵੱਡਾ-ਦਰਮਿਆਨਾ (Large-Medium)",
+                medSmall: "ਦਰਮਿਆਨਾ-ਛੋਟਾ (Medium-Small)",
+                grownQuantity: "ਕੁੱਲ ਪੈਦਾ ਕੀਤੀ ਮਾਤਰਾ (ਕਿ.ਗ੍ਰਾ.)",
+                grownQtyPlaceholder: "ਕੁੱਲ ਮਾਤਰਾ ਦਰਜ ਕਰੋ",
+                ratePerKg: "ਪ੍ਰਤੀ ਕਿਲੋ ਕੀਮਤ (₹)",
+                ratePlaceholder: "ਪ੍ਰਤੀ ਕਿਲੋ ਕੀਮਤ ਦਰਜ ਕਰੋ",
+                harvestDate: "ਕਟाई ਦੀ ਮਿਤੀ",
+                continueBtn: "ਜਾਰੀ ਰੱਖੋ",
+                p5Heading: "ਸੰਕਲਨ ਮੁਲਾਕਾਤ",
+                tokenLabel: "ਟੋਕਨ ਨੰ:",
+                paymentNote: "💰 ਕੇਂਦਰ ਵਿਖੇ ਉਤਪਾਦ ਜਮਾਂ ਕਰਨ 'ਤੇ ਤੁਰੰਤ ਭੁਗਤਾਨ ਕੀਤਾ ਜਾਵੇਗਾ।",
+                rescheduleMsg: "⚠️ ਟੋਕਨ ਦੀ ਮਿਆਦ ਪੁੱਗ ਗਈ! ਟੋਕਨ ਮੁੜ-ਨਿਰਧਾਰਤ ਕਰੋ",
+                itemLabel: "فصل/वस्तु:",
+                grownLabel: "ਕਿਸਾਨ ਦੁਆਰਾ ਕੁੱਲ ਉਗਾਈ ਗਈ ਮਾਤਰਾ:",
+                reqQtyLabel: "ਏਜੰਸੀ ਦੁਆਰਾ ਲੋੜੀਂਦੀ ਮਾਤਰਾ:",
+                scheduleLabel: "ਮਿਤੀ ਅਤੇ ਸਮਾਂ ਸਲਾਟ:",
+                centerLabel: "ਸੰਕਲਨ ਕੇਂਦਰ:",
+                centerName: "राज्य कृषि संग्रह केंद्र, गेट नंबर 3, मुख्य मंडी यार्ड.",
+                doneBtn: "ਪੂਰਾ ਹੋਇਆ",
+                successAlert: "ਸਪੁਰਦਗੀ ਸਫਲਤਾਪੂਰਵਕ ਤਸਦੀਕ ਕੀਤੀ ਗਈ!"
+            }
+        };
+
+        const produceLists = {
+            vegetables: ["Potato (आलू)", "Tomato (टमाटर)", "Onion (प्याज)", "Cauliflower (फूलगोभी)", "Cabbage (पत्ता गोभी)", "Brinjal (बैंगन)", "Okra (भिंडी)", "Green Peas (हरी मटर)"],
+            fruits: ["Mango (आम)", "Banana (केला)", "Guava (अमरूद)", "Papaya (पपीता)", "Pomegranate (अनार)", "Apple (सेब)", "Sapota (चीकू)", "Grapes (अंगूर)"],
+            crops: ["Wheat (गेहूं)", "Paddy (धान)", "Bajra (बाजरा)", "Jowar (ज्वार)", "Maize (मक्का)", "Soybean (सोयाबीन)", "Mustard (सरसों)", "Groundnut (मूंगफली)"]
+        };
+
+        let selectedLangCode = 'en';
+        let selectedCategory = '';
+        let timerInterval = null;
+        let remainingSeconds = 3 * 60 * 60; // 3 Hours Timer
+
+        function setLanguage(lang) {
+            selectedLangCode = lang;
+            document.querySelectorAll('.lang-card').forEach(card => card.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        function addNewLanguage() {
+            let customLang = prompt("Enter the name of the language you want to add:");
+            if (customLang) {
+                alert(customLang + " added successfully! Continuing with English fallback UI.");
+                selectedLangCode = 'en';
+                goToPage2();
+            }
+        }
+
+        function applyTranslations() {
+            const t = translations[selectedLangCode] || translations['en'];
+            
+            // Page 2
+            document.getElementById('aiPromptTextPage2').innerText = t.aiHelp;
+            document.getElementById('lblMobile').innerText = t.mobile;
+            document.getElementById('mobileNum').placeholder = t.mobilePlaceholder;
+            document.getElementById('lblOtp').innerText = t.otp;
+            document.getElementById('otpCode').placeholder = t.otpPlaceholder;
+            document.getElementById('lblAddress').innerText = t.address;
+            document.getElementById('workAddress').placeholder = t.addressPlaceholder;
+            document.getElementById('btnPage2Continue').innerText = t.continueBtn;
+
+            // Page 3
+            document.getElementById('aiPromptTextPage3').innerText = t.aiHelp;
+            document.getElementById('p3Heading').innerText = t.sellHeading;
+            document.getElementById('lblVegetables').innerText = t.vegetables;
+            document.getElementById('lblFruits').innerText = t.fruits;
+            document.getElementById('lblCrops').innerText = t.crops;
+            document.getElementById('btnPage3Continue').innerText = t.continueBtn;
+
+            // Page 4
+            document.getElementById('aiPromptTextPage4').innerText = t.aiHelp;
+            document.getElementById('lblSelectProduce').innerText = t.selectProduce;
+            document.getElementById('lblSelectSize').innerText = t.selectSize;
+            document.getElementById('optLargeMed').innerText = t.largeMed;
+            document.getElementById('optMedSmall').innerText = t.medSmall;
+            document.getElementById('lblGrownQuantity').innerText = t.grownQuantity;
+            document.getElementById('produceGrownQty').placeholder = t.grownQtyPlaceholder;
+            document.getElementById('lblRatePerKg').innerText = t.ratePerKg;
+            document.getElementById('ratePerKg').placeholder = t.ratePlaceholder;
+            document.getElementById('lblHarvestDate').innerText = t.harvestDate;
+            document.getElementById('btnPage4Continue').innerText = t.continueBtn;
+
+            // Page 5
+            document.getElementById('aiPromptTextPage5').innerText = t.aiHelp;
+            document.getElementById('p5Heading').innerText = t.p5Heading;
+            document.getElementById('lblTokenLabel').innerText = t.tokenLabel;
+            document.getElementById('paymentBadgeText').innerText = t.paymentNote;
+            document.getElementById('btnReschedule').innerText = t.rescheduleMsg;
+            document.getElementById('btnPage5Done').innerText = t.doneBtn;
+        }
+
+        function goToPage2() {
+            document.getElementById('page1').classList.remove('active');
+            document.getElementById('page2').classList.add('active');
+            applyTranslations();
+        }
+
+        function goToPage3() {
+            const mobile = document.getElementById('mobileNum').value;
+            const otp = document.getElementById('otpCode').value;
+
+            if(!mobile || mobile.length < 10) {
+                alert("Please enter a valid 10-digit mobile number.");
+                return;
+            }
+            if(!otp) {
+                alert("Please enter the OTP.");
+                return;
+            }
+
+            document.getElementById('page2').classList.remove('active');
+            document.getElementById('page3').classList.add('active');
+        }
+
+        function selectCategory(category) {
+            selectedCategory = category;
+            document.querySelectorAll('.category-card').forEach(card => card.classList.remove('selected'));
+            if(category === 'vegetables') document.getElementById('catVeg').classList.add('selected');
+            if(category === 'fruits') document.getElementById('catFruit').classList.add('selected');
+            if(category === 'crops') document.getElementById('catCrop').classList.add('selected');
+        }
+
+        function goToPage4() {
+            if(!selectedCategory) {
+                alert("Please select a category first.");
+                return;
+            }
+
+            const dropdown = document.getElementById('produceDropdown');
+            dropdown.innerHTML = '<option value="" disabled selected>-- Choose --</option>';
+            
+            const items = produceLists[selectedCategory] || [];
+            items.forEach(item => {
+                let opt = document.createElement('option');
+                opt.value = item;
+                opt.textContent = item;
+                dropdown.appendChild(opt);
+            });
+
+            document.getElementById('page3').classList.remove('active');
+            document.getElementById('page4').classList.add('active');
+        }
+
+        function goToPage5() {
+            const produce = document.getElementById('produceDropdown').value;
+            const size = document.getElementById('sizeDropdown').value;
+            const grownQty = parseFloat(document.getElementById('produceGrownQty').value);
+            const rate = document.getElementById('ratePerKg').value;
+            const date = document.getElementById('harvestDate').value;
+
+            if(!produce || !size || isNaN(grownQty) || !rate || !date) {
+                alert("Please complete all listing inputs on Page 4.");
+                return;
+            }
+
+            const requiredQty = Math.round(grownQty * 0.8 * 10) / 10;
+
+            generateTokenCard(produce, grownQty, requiredQty, rate, date);
+
+            document.getElementById('page4').classList.remove('active');
+            document.getElementById('page5').classList.add('active');
+            
+            start3HourTimer();
+        }
+
+        function generateTokenCard(produce, grownQty, requiredQty, rate, date) {
+            const tokenNo = "AGRI-" + Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('tokenNumberDisplay').innerText = tokenNo;
+
+            const dateObj = new Date(date);
+            const optionsDay = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+            const formattedDateStr = dateObj.toLocaleDateString('en-US', optionsDay);
+
+            // Generate 3 to 4 Hour Slot not exceeding 6:00 PM (18:00)
+            const possibleSlots = [
+                "09:00 AM - 01:00 PM",
+                "10:00 AM - 02:00 PM",
+                "11:00 AM - 03:00 PM",
+                "12:00 PM - 03:30 PM",
+                "01:00 PM - 05:00 PM",
+                "02:00 PM - 06:00 PM"
+            ];
+            const randomSlot = possibleSlots[Math.floor(Math.random() * possibleSlots.length)];
+
+            const t = translations[selectedLangCode] || translations['en'];
+
+            const detailsHtml = `
+                <p><strong>${t.itemLabel}</strong> ${produce}</p>
+                <p><strong>${t.grownLabel}</strong> ${grownQty} KG</p>
+                <p><strong>${t.reqQtyLabel}</strong> <span style="color:var(--grass-green); font-weight:bold;">${requiredQty} KG</span> (Rate: ₹${rate}/KG)</p>
+                <p><strong>${t.scheduleLabel}</strong> ${formattedDateStr} (${randomSlot})</p>
+                <p><strong>${t.centerLabel}</strong> ${t.centerName}</p>
+            `;
+            document.getElementById('tokenDetailsText').innerHTML = detailsHtml;
+
+            document.getElementById('mainTokenCard').classList.remove('expired');
+            document.getElementById('btnReschedule').style.display = 'none';
+            document.getElementById('btnPage5Done').style.display = 'block';
+        }
+
+        function submitAppointment() {
+            const t = translations[selectedLangCode] || translations['en'];
+            alert(t.successAlert);
+        }
+
+        function start3HourTimer() {
+            clearInterval(timerInterval);
+            remainingSeconds = 3 * 60 * 60;
+            updateTimerDisplay();
+
+            timerInterval = setInterval(() => {
+                remainingSeconds--;
+                if(remainingSeconds <= 0) {
+                    expireTokenImmediately();
+                } else {
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const hrs = String(Math.floor(remainingSeconds / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((remainingSeconds % 3600) / 60)).padStart(2, '0');
+            const secs = String(remainingSeconds % 60).padStart(2, '0');
+            document.getElementById('timerBadge').innerText = `⌛ ${hrs}:${mins}:${secs}`;
+        }
+
+        function expireTokenImmediately() {
+            clearInterval(timerInterval);
+            document.getElementById('timerBadge').innerText = "⌛ EXPIRED";
+            document.getElementById('mainTokenCard').classList.add('expired');
+            document.getElementById('btnReschedule').style.display = 'block';
+            document.getElementById('btnPage5Done').style.display = 'none';
+        }
+
+        function rescheduleToken() {
+            const produce = document.getElementById('produceDropdown').value;
+            const grownQty = parseFloat(document.getElementById('produceGrownQty').value) || 100;
+            const rate = document.getElementById('ratePerKg').value || 30;
+            
+            const newRequiredQty = Math.round((grownQty * (0.6 + Math.random() * 0.35)) * 10) / 10;
+            const futureDate = new Date();
+            futureDate.setDate(futureDate.getDate() + 1);
+            
+            alert("Generating a new rescheduled token...");
+            generateTokenCard(produce, grownQty, newRequiredQty, rate, futureDate.toISOString().split('T')[0]);
+            start3HourTimer();
+        }
+
+        function triggerVoiceAssistant() {
+            const t = translations[selectedLangCode] || translations['en'];
+            alert("AI Voice Assistant: \"" + t.aiHelp + "\"");
+            let userQuery = prompt("🎤 [Speak your query to the AI Assistant]:");
+            if(userQuery !== null) {
+                alert("🤖 AI Response (" + selectedLangCode.toUpperCase() + "):\nI received your query: '" + userQuery + "'. Your token slot is active!");
+            }
+        }
+    </script>
+</body>
+</html>
